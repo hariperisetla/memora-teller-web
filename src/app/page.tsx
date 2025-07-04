@@ -1,10 +1,21 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Camera, Heart, Share2 } from "lucide-react";
-import Link from "next/link";
 import { Polaroid } from "@/components/Polaroid";
+import Link from "next/link";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+} from "firebase/firestore";
+import { app } from "@/lib/firebase";
+import { motion } from "framer-motion";
+import { ArrowRight, Camera, Heart, Share2 } from "lucide-react";
 
 const exampleMemories = [
   {
@@ -33,7 +44,75 @@ const exampleMemories = [
   },
 ];
 
+async function fetchUserPhotos(userId: string) {
+  const db = getFirestore(app);
+  const q = query(
+    collection(db, "memories"),
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc")
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => doc.data());
+}
+
 export default function Home() {
+  const { user, loading } = useAuth();
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [galleryLoading, setGalleryLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserPhotos(user.uid).then((data) => {
+        setPhotos(data);
+        setGalleryLoading(false);
+      });
+    } else {
+      setGalleryLoading(false);
+    }
+  }, [user]);
+
+  if (loading || galleryLoading)
+    return <div className="text-center py-20">Loading...</div>;
+
+  if (user) {
+    if (photos.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] pt-28">
+          <p className="mb-6 text-lg">You have no memories yet.</p>
+          <Link href="/create-memora">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              Create Memory
+            </Button>
+          </Link>
+        </div>
+      );
+    }
+    return (
+      <div className="container mx-auto py-20">
+        <h1 className="text-4xl font-bold text-center mb-10">Your Gallery</h1>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+          {photos.map((photo, idx) => (
+            <Polaroid
+              key={idx}
+              imageUrl={photo.imageUrl}
+              title={photo.title}
+              story={photo.story}
+              date={
+                photo.createdAt && photo.createdAt.toDate
+                  ? photo.createdAt.toDate().toLocaleDateString()
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Unauthenticated: show marketing home page
   return (
     <main className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-orange-50 pt-20">
       {/* Hero Section */}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Camera, BookOpen, Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
 
 interface HeaderProps {
   onMobileMenuToggle: () => void;
@@ -11,6 +12,8 @@ interface HeaderProps {
 }
 
 export function Header({ onMobileMenuToggle, isMobileMenuOpen }: HeaderProps) {
+  const { user, signOut } = useAuth();
+
   return (
     <motion.header
       initial={{ y: -100, opacity: 0 }}
@@ -29,13 +32,31 @@ export function Header({ onMobileMenuToggle, isMobileMenuOpen }: HeaderProps) {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-4">
           <Button variant="ghost" asChild>
-            <Link href="/create">
+            <Link href="/create-memora">
               <BookOpen className="w-5 h-5 mr-2" /> Create Memory
             </Link>
           </Button>
-          <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-            Sign In
-          </Button>
+          {user ? (
+            <Button
+              variant="ghost"
+              onClick={() => signOut()}
+              className="text-gray-600 hover:text-purple-600"
+            >
+              Sign Out
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/signin">Sign In</Link>
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                asChild
+              >
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}

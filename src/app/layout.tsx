@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Fredoka, Pacifico } from "next/font/google";
 import "./globals.css";
 import { LayoutClientProvider } from "@/components/LayoutClientProvider";
+import { AuthProvider } from "@/lib/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-fredoka" });
@@ -40,7 +41,9 @@ export default function RootLayout({
       <body
         className={`${fredoka.variable} ${pacifico.variable} font-sans flex flex-col min-h-screen`}
       >
-        <LayoutClientProvider>{children}</LayoutClientProvider>
+        <AuthProvider>
+          <LayoutClientProvider>{children}</LayoutClientProvider>
+        </AuthProvider>
       </body>
     </html>
   );

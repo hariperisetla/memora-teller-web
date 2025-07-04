@@ -32,7 +32,9 @@ export function Polaroid({ imageUrl, title, story, date }: PolaroidProps) {
           <div className="text-center">
             <h3 className="text-lg font-semibold mb-2">{title}</h3>
             {date && <p className="text-sm text-gray-500">{date}</p>}
-            <p className="text-sm text-gray-600 mt-2">Click to read story</p>
+            <p className="text-sm text-gray-600 mt-2">
+              Click to explore your Memora
+            </p>
           </div>
         </div>
 
